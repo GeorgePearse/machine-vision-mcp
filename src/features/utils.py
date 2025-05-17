@@ -23,8 +23,15 @@ def preprocess_image(image: np.ndarray) -> np.ndarray:
         Preprocessed grayscale image
     """
     # Convert to grayscale if needed
-    if image.ndim == 3 and image.shape[2] >= 3:
-        gray = rgb2gray(image)
+    if image.ndim == 3:
+        if image.shape[2] == 4:  # RGBA image
+            # Extract RGB channels only, dropping alpha
+            rgb_image = image[:, :, :3]
+            gray = rgb2gray(rgb_image)
+        elif image.shape[2] >= 3:  # RGB image
+            gray = rgb2gray(image)
+        else:
+            gray = image
     else:
         gray = image
     

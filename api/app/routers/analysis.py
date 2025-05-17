@@ -226,8 +226,15 @@ async def analyze_image(request: AnalysisRequest):
             image = skio.imread(image_path)
             
             # Convert to grayscale if needed
-            if image.ndim == 3 and image.shape[2] >= 3:
-                gray = color.rgb2gray(image)
+            if image.ndim == 3:
+                if image.shape[2] == 4:  # RGBA image
+                    # Extract RGB channels only, dropping alpha
+                    rgb_image = image[:, :, :3]
+                    gray = color.rgb2gray(rgb_image)
+                elif image.shape[2] >= 3:  # RGB image
+                    gray = color.rgb2gray(image)
+                else:
+                    gray = image
             else:
                 gray = image
                 
@@ -328,7 +335,12 @@ async def analyze_image(request: AnalysisRequest):
             # Use threshold to detect objects
             threshold = request.threshold
             if rgb_image.ndim == 3:
-                gray = color.rgb2gray(rgb_image)
+                if rgb_image.shape[2] == 4:  # RGBA image
+                    # Extract RGB channels only, dropping alpha
+                    rgb_only = rgb_image[:, :, :3]
+                    gray = color.rgb2gray(rgb_only)
+                else:
+                    gray = color.rgb2gray(rgb_image)
             else:
                 gray = rgb_image
                 
